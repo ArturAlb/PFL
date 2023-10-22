@@ -39,6 +39,11 @@ draw_line([H|T]) :-
 
 /*place a piece in the board*/
 
+place_piece(Board, Column, Line, NewBoard, 2) :-
+    nth1(Line, Board, LineList),
+    replace(LineList, Column, ' ', NewLineList),
+    replace(Board, Line, NewLineList, NewBoard).
+
 place_piece(Board, Column, Line, NewBoard, 0) :-
     nth1(Line, Board, LineList),
     replace(LineList, Column, 'X', NewLineList),
@@ -58,7 +63,7 @@ replace([H|T], I, X, [H|R]) :-
 /*remove one piece from the board*/
 
 remove_piece(Board, Column, Line, NewBoard) :-
-    place_piece(Board, ' ', Column, Line, NewBoard).
+    place_piece(Board, Column, Line, NewBoard, 2).
 
 /*check if the game is over*/
 
@@ -68,51 +73,40 @@ is_even(X) :-
 start_game(0).
 
 start_game(60):-
-    initial_state(B,Y),
-    draw_board(B),
-    check_move(B,0, NB),
-    NN is 60-1,
-    start_game(NN,NB).
+    initial_state(Board,Game_info),
+    draw_board(Board),
+    check_move(Board, 0, New_Board),
+    Round is 60-1,
+    start_game(Round,New_Board).
 
-start_game(N,B):- N>0,
-    draw_board(B),
-    T is N mod 2,
-    check_move(B,T, NB),
-    NN is N-1,
-    start_game(NN,NB).
+start_game(Round, Board):- Round>0,
+    draw_board(Board),
+    Player is Round mod 2,
+    check_move(Board, Player, New_Board),
+    Round1 is Round-1,
+    start_game(Round1,New_Board).
 
-check_move(B,T,NB):-
+check_move(Board, Player, New_Board):-
     write('Column: '),
     read(C),
     write('Line: '),
     read(L),
-    nth1(L,B,Line),
+    valid_input(C,L),
+    nth1(L,Board,Line),
     nth1(C,Line,Elem),
-    check_move(B,C,L,Elem,T,NB).
+    check_move(Board,C,L,Elem,Player,New_Board).
     
-check_move(B,C,L,'X',T,NB):-
+check_move(Board, Column, Line, 'X', Player, New_Board):-
     write('Invalid, try again'),nl,
-    write('Column: '),
-    read(NC),nl,
-    write('Line: '),
-    read(NL),nl,
-    nth1(NL,B,Line),
-    nth1(NC,Line,Elem),
-    check_move(B,NC,NL,Elem,T,NB).
+    check_move(Board, Player, New_Board).
 
 check_move(B,C,L,'O',T,NB):-
     write('Invalid, try again'),nl,
-    write('Column: '),
-    read(NC),nl,
-    write('Line: '),
-    read(NL),nl,
-    nth1(NL,B,Line),
-    nth1(NC,Line,Elem),
-    check_move(B,NC,NL,Elem,T,NB).
+    check_move(Board, Player, New_Board).
 
-check_move(B,C,L,' ',T,NB):-
+check_move(B, C, L,' ', T, NB):-
     move_right(B,C,L,NNB),
-    place_piece(NNB, C, L,NB, T),
+    place_piece(NNB, C, L, NB, T),
     write('Valid'),nl.
 
 move_right(B,C,L,NB):-
@@ -124,7 +118,8 @@ move_right(B,C,L,NB):-
 
 move_right(B,C,L,' ',NB):-
     C < 7,
-    write('Found a spot'),nl.
+    write('Found a spot'),nl,
+    NB = B.
 
 move_right(B,C,L,'O',NNB):-
     C < 7,
@@ -132,7 +127,8 @@ move_right(B,C,L,'O',NNB):-
     nth1(L,B,Line),
     nth1(NC,Line,NElem),
     move_right(B,NC,L,NElem,NB),
-    place_piece(NB,NC, L,NNB,1).
+    place_piece(NB,NC, L,NB1,1),
+    remove_piece(NB1,C, L,NNB).
 
 move_right(B,C,L,'X',NNB):-
     C < 7,
@@ -140,5 +136,5 @@ move_right(B,C,L,'X',NNB):-
     nth1(L,B,Line),
     nth1(NC,Line,NElem),
     move_right(B,NC,L,NElem,NB),
-    place_piece(NB,NC, L,NNB,0).
-
+    place_piece(NB,NC, L,NB1,0),
+    remove_piece(NB1,C, L,NNB).
