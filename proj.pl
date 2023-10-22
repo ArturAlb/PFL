@@ -111,5 +111,34 @@ check_move(B,C,L,'O',T,NB):-
     check_move(B,NC,NL,Elem,T,NB).
 
 check_move(B,C,L,' ',T,NB):-
-    place_piece(B, C, L,NB, T),
+    move_right(B,C,L,NNB),
+    place_piece(NNB, C, L,NB, T),
     write('Valid'),nl.
+
+move_right(B,C,L,NB):-
+    C < 7,
+    NC is C+1,
+    nth1(L,B,Line),
+    nth1(NC,Line,Elem),
+    move_right(B,NC,L,Elem,NB).
+
+move_right(B,C,L,' ',NB):-
+    C < 7,
+    write('Found a spot'),nl.
+
+move_right(B,C,L,'O',NNB):-
+    C < 7,
+    NC is C+1,
+    nth1(L,B,Line),
+    nth1(NC,Line,NElem),
+    move_right(B,NC,L,NElem,NB),
+    place_piece(NB,NC, L,NNB,1).
+
+move_right(B,C,L,'X',NNB):-
+    C < 7,
+    NC is C+1,
+    nth1(L,B,Line),
+    nth1(NC,Line,NElem),
+    move_right(B,NC,L,NElem,NB),
+    place_piece(NB,NC, L,NNB,0).
+
