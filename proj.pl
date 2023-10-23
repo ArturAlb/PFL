@@ -86,28 +86,40 @@ start_game(Round, Board):- Round>0,
     Round1 is Round-1,
     start_game(Round1,New_Board).
 
-check_move(Board, Player, New_Board):-
-    write('Column: '),
-    read(C),
-    write('Line: '),
-    read(L),
-    valid_input(C,L),
-    nth1(L,Board,Line),
-    nth1(C,Line,Elem),
-    check_move(Board,C,L,Elem,Player,New_Board).
+    check_move(B,T,NB):-
+        write('Column: '),
+        read(C),
+        write('Line: '),
+        read(L),
+        nth1(L,B,Line),
+        nth1(C,Line,Elem),
+        check_move(B,C,L,Elem,T,NB).
+        
+    check_move(B,C,L,'X',T,NB):-
+        write('Invalid, try again'),nl,
+        write('Column: '),
+        read(NC),nl,
+        write('Line: '),
+        read(NL),nl,
+        nth1(NL,B,Line),
+        nth1(NC,Line,Elem),
+        check_move(B,NC,NL,Elem,T,NB).
     
-check_move(Board, Column, Line, 'X', Player, New_Board):-
-    write('Invalid, try again'),nl,
-    check_move(Board, Player, New_Board).
-
-check_move(B,C,L,'O',T,NB):-
-    write('Invalid, try again'),nl,
-    check_move(Board, Player, New_Board).
-
-check_move(B, C, L,' ', T, NB):-
-    move_right(B,C,L,NNB),
-    place_piece(NNB, C, L, NB, T),
-    write('Valid'),nl.
+    check_move(B,C,L,'O',T,NB):-
+        write('Invalid, try again'),nl,
+        write('Column: '),
+        read(NC),nl,
+        write('Line: '),
+        read(NL),nl,
+        nth1(NL,B,Line),
+        nth1(NC,Line,Elem),
+        check_move(B,NC,NL,Elem,T,NB).
+    
+    check_move(B,C,L,' ',T,NB):-
+        move_right(B,C,L,NNB),
+        move_left(NNB,C,L,NNNB),
+        place_piece(NNNB, C, L,NB, T),
+        write('Valid'),nl.
 
 move_right(B,C,L,NB):-
     C < 7,
@@ -136,5 +148,35 @@ move_right(B,C,L,'X',NNB):-
     nth1(L,B,Line),
     nth1(NC,Line,NElem),
     move_right(B,NC,L,NElem,NB),
+    place_piece(NB,NC, L,NB1,0),
+    remove_piece(NB1,C, L,NNB).
+
+move_left(B,C,L,NB):-
+    C > 0,
+    NC is C-1,
+    nth1(L,B,Line),
+    nth1(NC,Line,Elem),
+    move_left(B,NC,L,Elem,NB).
+
+move_left(B,C,L,' ',NB):-
+    C > 0,
+    write('Found a spot'),nl,
+    NB = B.
+
+move_left(B,C,L,'O',NNB):-
+    C > 0,
+    NC is C-1,
+    nth1(L,B,Line),
+    nth1(NC,Line,NElem),
+    move_left(B,NC,L,NElem,NB),
+    place_piece(NB,NC, L,NB1,1),
+    remove_piece(NB1,C, L,NNB).
+
+move_left(B,C,L,'X',NNB):-
+    C > 0,
+    NC is C-1,
+    nth1(L,B,Line),
+    nth1(NC,Line,NElem),
+    move_left(B,NC,L,NElem,NB),
     place_piece(NB,NC, L,NB1,0),
     remove_piece(NB1,C, L,NNB).
