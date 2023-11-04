@@ -186,6 +186,23 @@ check_move(B,7,L,' ',T,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
     place_piece(B, 7, L,NB, T,Xpieces, Opieces,Xnewpieces, Onewpieces),
     write('Valid'),nl.
 
+
+move_right(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
+    NC is C + 1,
+    nth1(L,B,Line),
+    nth1(NC,Line,Elem),
+    (Elem = ' ' -> 
+        
+    )
+    move_right(B,NC,L,Elem,NB,Xpieces, Opieces,Xnewpieces, Onewpieces).
+
+move_right(B,C,L,' ',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):- 
+    nth1(L,B,Line),
+    nth1(C,Line,NewElem),
+
+
+
+/*
 move_right(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
     C < 7,
     NC is C+1,
@@ -330,3 +347,4 @@ move_down(B,C,L,' ',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
     Xnewpieces = Xpieces,
     Onewpieces = Opieces,
     NB = B.
+*/
