@@ -80,15 +80,15 @@ place_piece(Board, Column, Line, NewBoard, 2) :-
     replace(Board, Line, NewLineList, NewBoard).
 
 place_piece(Board, Column, Line, NewBoard, 0,Xpieces, Opieces,Xnewpieces, Onewpieces) :-
-    Xnewpieces is Xpieces+1,
-    Onewpieces is Opieces+0,
+    Xnewpieces is Xpieces + 1,
+    Onewpieces is Opieces + 0,
     nth1(Line, Board, LineList),
     replace(LineList, Column, 'X', NewLineList),
     replace(Board, Line, NewLineList, NewBoard).
 
 place_piece(Board, Column, Line, NewBoard, 1,Xpieces, Opieces,Xnewpieces, Onewpieces) :-
-    Xnewpieces is Xpieces+0,
-    Onewpieces is Opieces+1,
+    Xnewpieces is Xpieces + 0,
+    Onewpieces is Opieces + 1,
     nth1(Line, Board, LineList),
     replace(LineList, Column, 'O', NewLineList),
     replace(Board, Line, NewLineList, NewBoard).
@@ -102,8 +102,8 @@ replace([H|T], I, X, [H|R]) :-
 /*remove one piece from the board*/
 
 remove_piece(Board, Column, Line, NewBoard,'X',Xpieces, Opieces,Xnewpieces, Onewpieces) :-
-    Xnewpieces is Xpieces-1,
-    Onewpieces is Opieces-0,
+    Xnewpieces is Xpieces - 1,
+    Onewpieces is Opieces - 0,
     place_piece(Board, Column, Line, NewBoard, 2).
 
 remove_piece(Board, Column, Line, NewBoard,'O',Xpieces, Opieces,Xnewpieces, Onewpieces) :-
@@ -175,10 +175,10 @@ check_move(B,C,L,' ',T,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
     NL2 is L - 1,
     NC is C + 1,
     move_right(B,NC,L,B1,Xpieces, Opieces,Xnewpieces1, Onewpieces1),
-    move_down(B1,C,NL1,B2,Xnewpieces1, Onewpieces1,Xnewpieces2, Onewpieces2),
-    move_up(B2,C,NL2,B3,Xnewpieces2, Onewpieces2,Xnewpieces3, Onewpieces3),
+    %move_down(B1,C,NL1,B2,Xnewpieces1, Onewpieces1,Xnewpieces2, Onewpieces2),
+    %move_up(B2,C,NL2,B3,Xnewpieces2, Onewpieces2,Xnewpieces3, Onewpieces3),
     %move_left(NNB,C,L,NNNB),
-    place_piece(B3, C, L, NB, T, Xnewpieces3, Onewpieces3, Xnewpieces, Onewpieces),
+    place_piece(B1, C, L, NB, T, Xnewpieces1, Onewpieces1, Xnewpieces, Onewpieces),
     write('Valid'),nl.
 
 check_move(B,7,L,' ',T,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
@@ -188,17 +188,28 @@ check_move(B,7,L,' ',T,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
 
 
 move_right(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
+    nth1(L,B,Line),
+    nth1(C,Line,ElemC),
     NC is C + 1,
     nth1(L,B,Line),
-    nth1(NC,Line,Elem),
-    (Elem = ' ' -> 
-        
-    )
-    move_right(B,NC,L,Elem,NB,Xpieces, Opieces,Xnewpieces, Onewpieces).
+    nth1(NC,Line,ElemR),
+    (ElemC = ' ' ->
+        write('cenas'),nl
+        ;
+        (ElemR = ' ' ->
+            (ElemC = 'X' ->
+                place_piece(B,NC,L,NB1,0,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
+                remove_piece(NB1,C,L,NB,'X',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
+            ;
+                place_piece(B,NC,L,NB1,1,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
+                remove_piece(NB1,C,L,NB,'O',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
+            )
+        ;
+            move_right(B,NC,L,NB,Xpieces,Opieces,Xnewpieces,Onewpieces)
+        )
+    ).
 
-move_right(B,C,L,' ',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):- 
-    nth1(L,B,Line),
-    nth1(C,Line,NewElem),
+
 
 
 
