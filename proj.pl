@@ -142,12 +142,12 @@ place_piece(GameState, Column, Line, 0, NewGameState) :-
     update_Board(GameState1, NewBoard, NewGameState).
 
 place_piece(GameState, Column, Line, 1, NewGameState) :-
-    update_add_O(GameState1, GameState2),
-    get_Board(GameState, Board),
+    update_add_O(GameState, GameState1),
+    get_Board(GameState1, Board),
     nth1(Line, Board, LineList),
     replace(LineList, Column, 'O', NewLineList),
     replace(Board, Line, NewLineList, NewBoard),
-    update_Board(GameState, NewBoard, NewGameState).
+    update_Board(GameState1, NewBoard, NewGameState).
 
 replace([_|T], 1, X, [X|T]) :- !.
 replace([H|T], I, X, [H|R]) :-
@@ -158,14 +158,10 @@ replace([H|T], I, X, [H|R]) :-
 /*remove one piece from the board*/
 
 remove_piece(GameState, Column, Line, NewGameState):-
+    get_Board(GameState, Board),
     nth1(Line, Board, LineList),
     nth1(Column, LineList, Elem),
-    (Elem = 'X' ->
-        update_take_X(GameState, GameState1)
-    ;
-        update_take_O(GameState, GameState1)
-    ),
-    place_piece(GameState, Column, Line, NewGameState, 2).
+    place_piece(GameState, Column, Line, 2, NewGameState).
 
 /*check if the game is over*/
 
@@ -196,6 +192,7 @@ start_game(GameState):-
     draw_board(Board),
     get_Xamount(GameState, Xpieces),
     get_Oamount(GameState, Opieces),
+    write('Player 1 - X, player 2 - O'), nl,
     write('Player 1: '),write(Xpieces),nl,
     write('Player 2: '),write(Opieces),nl,
     check_move(GameState, GameState1),
@@ -234,6 +231,9 @@ check_move('O', GameState, Column, Line, NewGameState):-
 
 check_move(' ', GameState, C, L, NewGameState):-
     C < 8,
+    C > 0,
+    L < 8,
+    L > 0,
     get_Round(GameState, Round),
     Player is Round mod 2,
     NLD is L + 1,
@@ -241,111 +241,221 @@ check_move(' ', GameState, C, L, NewGameState):-
     NCR is C + 1,
     NCL is C - 1,
     move_right(GameState, NCR, L, GameState1),
-    place_piece(GameState1, C, L, Player, NewGameState),
+    move_left(GameState1, NCL, L, GameState2),
+    move_up(GameState2, C, NLU, GameState3),
+    move_down(GameState3, C, NLD, GameState4),
+    move_down_right(GameState4, NCR, NLD, GameState5),
+    place_piece(GameState5, C, L, Player, NewGameState),
     write('Valid'),nl.
 
 move_right(GameState, C, L, NewGameState):-
     get_Board(GameState, B),
-    nth1(L,B,Line),
-    nth1(C,Line,ElemC),
-    (ElemC = ' ' ->
-        write('cenas'),nl,
+    (C = 8 ->
+        write('stuff'),
         NewGameState = GameState
     ;
-        NC is C + 1,
-        (NC = '8' ->
-            remove_piece(GameState, C, L, NewGameState)
-        ;
-            nth1(L,B,Line1),
-            nth1(NC,Line1,ElemR),
-            (ElemR = ' ' ->
-                (ElemC = 'X' ->
-                    place_piece(GameState, NC, L, 0, GameState1)
-                ;
-                    place_piece(GameState, NC, L, 1, GameState1)
-                ),
-                remove_piece(GameState1, C, L, NewGameState)
-            ;
-                move_right(GameState, NC, L, NewGameState)
-            )
-        )
-    ).
-
-move_left(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    nth1(L,B,Line),
-    nth1(C,Line,ElemC),
-    NC is C - 1,
-    (NC = '0' ->
-        remove_piece(GameState, C, L, NewGameState)
-    ;
         nth1(L,B,Line),
-        nth1(NC,Line,ElemR),
+        nth1(C,Line,ElemC),
         (ElemC = ' ' ->
             write('cenas'),nl,
-            NB = B,
-            Xnewpieces = Xpieces,
-            Onewpieces = Opieces
+            NewGameState = GameState
         ;
-            (ElemR = ' ' ->
-                place_piece(GameState, NC, L, GameState1),
-                remove_piece(GameState1, C, L, NewGameState)
+            NC is C + 1,
+            (NC = 8 ->
+                remove_piece(GameState, C, L, GameState1),
+                (Elem = 'X' ->
+                    update_take_X(GameState1, GameState2)
+                ;
+                    update_take_O(GameState1, GameState2)
+                )
             ;
-                move_right(GameState, NC, L, NewGameState)
+                nth1(L,B,Line1),
+                nth1(NC,Line1,ElemR),
+                (ElemR = ' ' ->
+                    (ElemC = 'X' ->
+                        place_piece(GameState, NC, L, 0, GameState1),
+                        update_take_X(GameState1, GameState2)
+                    ;
+                        place_piece(GameState, NC, L, 1, GameState1),
+                        update_take_X(GameState1, GameState2)
+                    ),
+                    remove_piece(GameState2, C, L, NewGameState)
+                ;
+                    move_right(GameState, NC, L, NewGameState)
+                )
             )
         )
     ).
 
-move_up(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    nth1(L,B,Line),
-    nth1(C,Line,ElemC),
-    NL is L - 1,
-    nth1(NL,B,Line1),
-    nth1(C,Line1,ElemR),
-    (ElemC = ' ' ->
-        write('cenas'),nl,
-        NB = B,
-        Xnewpieces = Xpieces,
-        Onewpieces = Opieces
+move_left(GameState, C, L, NewGameState):-
+    get_Board(GameState, B),
+    (C = 0 ->
+        write('stuff'),
+        NewGameState = GameState
     ;
-        (ElemR = ' ' ->
-            (ElemC = 'X' ->
-                place_piece(B,C,NL,NB1,0,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
-                remove_piece(NB1,C,L,NB,'X',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
-            ;
-                place_piece(B,C,NL,NB1,1,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
-                remove_piece(NB1,C,L,NB,'O',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
-            )
+        nth1(L,B,Line),
+        nth1(C,Line,ElemC),
+        (ElemC = ' ' ->
+            write('cenas'),nl,
+            NewGameState = GameState
         ;
-            move_up(B,C,NL,NB,Xpieces,Opieces,Xnewpieces,Onewpieces)
+            NC is C - 1,
+            (NC = 0 ->
+                remove_piece(GameState, C, L, GameState1),
+                (Elem = 'X' ->
+                    update_take_X(GameState1, GameState2)
+                ;
+                    update_take_O(GameState1, GameState2)
+                )
+            ;
+                nth1(L,B,Line1),
+                nth1(NC,Line1,ElemR),
+                (ElemR = ' ' ->
+                    (ElemC = 'X' ->
+                        place_piece(GameState, NC, L, 0, GameState1),
+                        update_take_X(GameState1, GameState2)
+                    ;
+                        place_piece(GameState, NC, L, 1, GameState1),
+                        update_take_X(GameState1, GameState2)
+                    ),
+                    remove_piece(GameState2, C, L, NewGameState)
+                ;
+                    move_left(GameState, NC, L, NewGameState)
+                )
+            )
         )
     ).
 
-move_down(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    nth1(L,B,Line),
-    nth1(C,Line,ElemC),
-    NL is L + 1,
-    nth1(NL,B,Line1),
-    nth1(C,Line1,ElemR),
-    (ElemC = ' ' ->
-        write('cenas'),nl,
-        NB = B,
-        Xnewpieces = Xpieces,
-        Onewpieces = Opieces
+move_up(GameState, C, L, NewGameState):-
+    get_Board(GameState, B),
+    (L = 0 ->
+        write('stuff'),
+        NewGameState = GameState
     ;
-        (ElemR = ' ' ->
-            (ElemC = 'X' ->
-                place_piece(B,C,NL,NB1,0,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
-                remove_piece(NB1,C,L,NB,'X',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
-            ;
-                place_piece(B,C,NL,NB1,1,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
-                remove_piece(NB1,C,L,NB,'O',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
-            )
+        nth1(L,B,Line),
+        nth1(C,Line,ElemC),
+        (ElemC = ' ' ->
+            write('cenas'),nl,
+            NewGameState = GameState
         ;
-            move_down(B,C,NL,NB,Xpieces,Opieces,Xnewpieces,Onewpieces)
+            NL is L - 1,
+            (NL = 0 ->
+                remove_piece(GameState, C, L, GameState1),
+                (Elem = 'X' ->
+                    update_take_X(GameState1, GameState2)
+                ;
+                    update_take_O(GameState1, GameState2)
+                )
+            ;
+                nth1(L,B,Line1),
+                nth1(NC,Line1,ElemR),
+                (ElemR = ' ' ->
+                    (ElemC = 'X' ->
+                        place_piece(GameState, C, NL, 0, GameState1),
+                        update_take_X(GameState1, GameState2)
+                    ;
+                        place_piece(GameState, C, NL, 1, GameState1),
+                        update_take_O(GameState1, GameState2)
+                    ),
+                    remove_piece(GameState2, C, L, NewGameState)
+                ;
+                    move_right(GameState, C, NL, NewGameState)
+                )
+            )
         )
     ).
 
-move_up_right(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
+move_down(GameState, C, L, NewGameState):-
+    get_Board(GameState, B),
+    (L = 8 ->
+        write('stuff'),
+        NewGameState = GameState
+    ;
+        nth1(L,B,Line),
+        nth1(C,Line,ElemC),
+        (ElemC = ' ' ->
+            write('cenas'),nl,
+            NewGameState = GameState
+        ;
+            NL is L + 1,
+            (NL = 8 ->
+                remove_piece(GameState, C, L, GameState1),
+                (Elem = 'X' ->
+                    update_take_X(GameState1, GameState2)
+                ;
+                    update_take_O(GameState1, GameState2)
+                )
+            ;
+                nth1(NL,B,Line1),
+                nth1(C,Line1,ElemR),
+                (ElemR = ' ' ->
+                    (ElemC = 'X' ->
+                        place_piece(GameState, C, NL, 0, GameState1),
+                        update_take_X(GameState1, GameState2)
+                    ;
+                        place_piece(GameState, C, NL, 1, GameState1),
+                        update_take_O(GameState1, GameState2)
+                    ),
+                    remove_piece(GameState2, C, L, NewGameState)
+                ;
+                    move_down(GameState, C, NL, NewGameState)
+                )
+            )
+        )
+    ).
+
+move_down_right(GameState, C, L, NewGameState):-
+    get_Board(GameState, B),
+    (L = 8 ->
+        NewGameState = GameState
+    ;
+        (C = 8 ->
+            NewGameState = GameState
+        ;
+            nth1(L,B,Line),
+            nth1(C,Line,ElemC),
+            (ElemC = ' ' ->
+                NewGameState = GameState
+            ;
+                NL is L + 1,
+                (NL = 8 ->
+                    remove_piece(GameState, C, L, GameState1),
+                    (Elem = 'X' ->
+                        update_take_X(GameState1, GameState2)
+                    ;
+                        update_take_O(GameState1, GameState2)
+                    )
+                ;
+                    NC is C + 1,
+                    (NC = 8 ->
+                        remove_piece(GameState, C, L, GameState1),
+                        (Elem = 'X' ->
+                            update_take_X(GameState1, GameState2)
+                        ;
+                            update_take_O(GameState1, GameState2)
+                        )
+                    ;
+                        nth1(NL,B,Line1),
+                        nth1(NC,Line1,ElemR),
+                        (ElemR = ' ' ->
+                            (ElemC = 'X' ->
+                                place_piece(GameState, NC, NL, 0, GameState1),
+                                update_take_X(GameState1, GameState2)
+                            ;
+                                place_piece(GameState, NC, NL, 1, GameState1),
+                                update_take_O(GameState1, GameState2)
+                            ),
+                            remove_piece(GameState2, C, L, NewGameState)
+                        ;
+                            move_down_right(GameState, NC, NL, NewGameState)
+                        )
+                    )
+                )
+            )
+        )
+    ).
+
+/*move_up_right(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
     nth1(L,B,Line),
     nth1(C,Line,ElemC),
     NL is L - 1,
@@ -448,7 +558,7 @@ move_down_left(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
             move_down_left(B,NC,NL,NB,Xpieces,Opieces,Xnewpieces,Onewpieces)
         )
     ).
-
+*/
 
 
 
