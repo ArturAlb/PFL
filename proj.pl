@@ -230,7 +230,8 @@ start_game(GameState):-
                 ;
                 valid_moves(GameState, Moves),
                 BaseMove = [1,1],
-                get_best_move(Moves, GameState, BaseMove, 0, BestMove, BestValue),
+                %print_moves(Moves),
+                get_best_move(Moves, GameState, BaseMove, -10, BestMove, BestValue),
                 nth1(1,BestMove,Col),
                 nth1(2,BestMove,Row),
                 check_move(' ',GameState, Col, Row, GameState1),
@@ -390,8 +391,8 @@ move_up(GameState, C, L, NewGameState):-
                     update_take_O(GameState1, NewGameState)
                 )
             ;
-                nth1(L,B,Line1),
-                nth1(NC,Line1,ElemR),
+                nth1(NL,B,Line1),
+                nth1(C,Line1,ElemR),
                 (ElemR = ' ' ->
                     (ElemC = 'X' ->
                         place_piece(GameState, C, NL, 0, GameState1),
@@ -402,7 +403,7 @@ move_up(GameState, C, L, NewGameState):-
                     ),
                     remove_piece(GameState2, C, L, NewGameState)
                 ;
-                    move_right(GameState, C, NL, NewGameState)
+                    move_up(GameState, C, NL, NewGameState)
                 )
             )
         )
@@ -590,7 +591,7 @@ move_up_right(GameState, C, L, NewGameState):-
                             ),
                             remove_piece(GameState2, C, L, NewGameState)
                         ;
-                            move_down_right(GameState, NC, NL, NewGameState)
+                            move_up_right(GameState, NC, NL, NewGameState)
                         )
                     )
                 )
@@ -641,7 +642,7 @@ move_up_left(GameState, C, L, NewGameState):-
                             ),
                             remove_piece(GameState2, C, L, NewGameState)
                         ;
-                            move_down_left(GameState, NC, NL, NewGameState)
+                            move_up_left(GameState, NC, NL, NewGameState)
                         )
                     )
                 )
@@ -674,6 +675,8 @@ select_random_move(GameState, Col,Row) :-
     nth1(2,RandomMove,Row).
 
 end_screen(GameState, Winner):-
+    get_Board(GameState, Board),
+    draw_board(Board),
     (Winner = 0 ->
         write('Player 1 wins'),nl
     ;
@@ -683,8 +686,7 @@ end_screen(GameState, Winner):-
             write('it\'s a draw'),nl
         )
     ),
-    get_Board(GameState, Board),
-    draw_board(Board).
+    menu.
 
 game_over(GameState, Winner):-
     get_Round(GameState, Round),
@@ -761,6 +763,12 @@ print_move(Move):-
     write('printMove: '),write(Col),write(' '),write(Row),nl.
 
 get_dist(Col, Row, Dist):-
-    Dist1 is 4 - Col,
-    Dist2 is 4 - Row,
-    Dist is sqrt(Dist1*Dist1 + Dist2*Dist2).
+    Dist1 is abs(4 - Col),
+    Dist2 is abs(4 - Row),
+    Dist is Dist1+Dist2.
+
+print_moves([H|T]):-
+    print_move(H),
+    print_moves(T).
+
+print_moves([]).
