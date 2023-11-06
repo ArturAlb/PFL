@@ -28,6 +28,12 @@ set_player2(GameState, NewGameState,Player) :-
     replace(Line,5,Player,NewLine),
     replace(GameState,2,NewLine,NewGameState).
 
+choose_bot_type(Type):-
+    write('Choose bot type:'),nl,
+    write('1. Random'),nl,
+    write('2. Greedy'),nl,
+    read(Type).
+
 update_add_X(GameState,NewGameState) :-
     nth1(2,GameState,Line),
     nth1(1,Line,XAmount),
@@ -102,20 +108,24 @@ handle_option(1) :-
 handle_option(2) :-
     write('You selected Option 2.\n'),
     initial_state(GameState),
-    set_player2(GameState, GameState1, 1),
+    choose_bot_type(Type),
+    set_player2(GameState, GameState1, Type),
     start_game(GameState1).
 
 handle_option(3) :-
     write('You selected Option 3.\n'),
     initial_state(GameState),
-    set_player1(GameState, GameState1, 1),
+    choose_bot_type(Type),
+    set_player1(GameState, GameState1, Type),
     start_game(GameState1).
 
 handle_option(4) :-
     write('You selected Option 4.\n'),
     initial_state(GameState),
-    set_player1(GameState, GameState1, 1),
-    set_player2(GameState1, GameState2, 1),
+    choose_bot_type(Type),
+    set_player1(GameState, GameState1, Type),
+    choose_bot_type(Type2),
+    set_player2(GameState1, GameState2, Type2),
     start_game(GameState2).
 
 handle_option(Option) :-
@@ -289,7 +299,6 @@ move_right(GameState, C, L, NewGameState):-
         nth1(L,B,Line),
         nth1(C,Line,ElemC),
         (ElemC = ' ' ->
-            write('cenas'),nl,
             NewGameState = GameState
         ;
             NC is C + 1,
@@ -328,7 +337,6 @@ move_left(GameState, C, L, NewGameState):-
         nth1(L,B,Line),
         nth1(C,Line,ElemC),
         (ElemC = ' ' ->
-            write('cenas'),nl,
             NewGameState = GameState
         ;
             NC is C - 1,
@@ -367,7 +375,6 @@ move_up(GameState, C, L, NewGameState):-
         nth1(L,B,Line),
         nth1(C,Line,ElemC),
         (ElemC = ' ' ->
-            write('cenas'),nl,
             NewGameState = GameState
         ;
             NL is L - 1,
@@ -406,7 +413,6 @@ move_down(GameState, C, L, NewGameState):-
         nth1(L,B,Line),
         nth1(C,Line,ElemC),
         (ElemC = ' ' ->
-            write('cenas'),nl,
             NewGameState = GameState
         ;
             NL is L + 1,
@@ -703,257 +709,3 @@ game_over(GameState, Winner):-
             )
         )
     ).
-
-/*move_up_right(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    nth1(L,B,Line),
-    nth1(C,Line,ElemC),
-    NL is L - 1,
-    NC is C + 1,
-    nth1(NL,B,Line1),
-    nth1(NC,Line1,ElemR),
-    (ElemC = ' ' ->
-        write('cenas'),nl,
-        NB = B,
-        Xnewpieces = Xpieces,
-        Onewpieces = Opieces
-    ;
-        (ElemR = ' ' ->
-            (ElemC = 'X' ->
-                place_piece(B,NC,NL,NB1,0,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
-                remove_piece(NB1,C,L,NB,'X',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
-            ;
-                place_piece(B,NC,NL,NB1,1,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
-                remove_piece(NB1,C,L,NB,'O',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
-            )
-        ;
-            move_up_right(B,NC,NL,NB,Xpieces,Opieces,Xnewpieces,Onewpieces)
-        )
-    ).
-
-move_up_left(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    nth1(L,B,Line),
-    nth1(C,Line,ElemC),
-    NL is L - 1,
-    NC is C - 1,
-    nth1(NL,B,Line1),
-    nth1(NC,Line1,ElemR),
-    (ElemC = ' ' ->
-        write('cenas'),nl,
-        NB = B,
-        Xnewpieces = Xpieces,
-        Onewpieces = Opieces
-    ;
-        (ElemR = ' ' ->
-            (ElemC = 'X' ->
-                place_piece(B,NC,NL,NB1,0,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
-                remove_piece(NB1,C,L,NB,'X',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
-            ;
-                place_piece(B,NC,NL,NB1,1,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
-                remove_piece(NB1,C,L,NB,'O',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
-            )
-        ;
-            move_up_left(B,NC,NL,NB,Xpieces,Opieces,Xnewpieces,Onewpieces)
-        )
-    ).
-
-move_down_right(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    nth1(L,B,Line),
-    nth1(C,Line,ElemC),
-    NL is L + 1,
-    NC is C + 1,
-    nth1(NL,B,Line1),
-    nth1(NC,Line1,ElemR),
-    (ElemC = ' ' ->
-        write('cenas'),nl,
-        NB = B,
-        Xnewpieces = Xpieces,
-        Onewpieces = Opieces
-    ;
-        (ElemR = ' ' ->
-            (ElemC = 'X' ->
-                place_piece(B,NC,NL,NB1,0,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
-                remove_piece(NB1,C,L,NB,'X',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
-            ;
-                place_piece(B,NC,NL,NB1,1,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
-                remove_piece(NB1,C,L,NB,'O',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
-            )
-        ;
-            move_down_right(B,NC,NL,NB,Xpieces,Opieces,Xnewpieces,Onewpieces)
-        )
-    ).
-
-move_down_left(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    nth1(L,B,Line),
-    nth1(C,Line,ElemC),
-    NL is L + 1,
-    NC is C - 1,
-    nth1(NL,B,Line1),
-    nth1(NC,Line1,ElemR),
-    (ElemC = ' ' ->
-        write('cenas'),nl,
-        NB = B,
-        Xnewpieces = Xpieces,
-        Onewpieces = Opieces
-    ;
-        (ElemR = ' ' ->
-            (ElemC = 'X' ->
-                place_piece(B,NC,NL,NB1,0,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
-                remove_piece(NB1,C,L,NB,'X',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
-            ;
-                place_piece(B,NC,NL,NB1,1,Xpieces,Opieces,Xnewpieces1, Onewpieces1),
-                remove_piece(NB1,C,L,NB,'O',Xnewpieces1,Onewpieces1,Xnewpieces, Onewpieces)
-            )
-        ;
-            move_down_left(B,NC,NL,NB,Xpieces,Opieces,Xnewpieces,Onewpieces)
-        )
-    ).
-*/
-
-
-
-/*
-move_right(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    C < 7,
-    NC is C+1,
-    nth1(L,B,Line),
-    nth1(NC,Line,Elem),
-    move_right(B,NC,L,Elem,NB,Xpieces, Opieces,Xnewpieces, Onewpieces).
-
-move_right(B,C,L,' ',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    C < 7,
-    write('Found a spot'),nl,
-    Xnewpieces is Xpieces-0,
-    Onewpieces is Opieces-0,
-    NB = B.
-
-move_right(B,C,L,'O',NNB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    C < 7,
-    NC is C+1,
-    nth1(L,B,Line),
-    nth1(NC,Line,NElem),
-    move_right(B,NC,L,NElem,NB,Xpieces, Opieces,Xnewnewpieces, Onewnewpieces),
-    place_piece(NB,NC, L,NB1,1,Xnewnewpieces, Onewnewpieces,Xnewnewnewpieces, Onewnewnewpieces),
-    remove_piece(NB1,C, L,NNB,'O',Xnewnewnewpieces, Onewnewnewpieces,Xnewpieces, Onewpieces).
-
-move_right(B,C,L,'X',NNB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    C < 7,
-    NC is C+1,
-    nth1(L,B,Line),
-    nth1(NC,Line,NElem),
-    move_right(B,NC,L,NElem,NB,Xpieces, Opieces,Xnewnewpieces, Onewnewpieces),
-    place_piece(NB,NC, L,NB1,0,Xnewnewpieces, Onewnewpieces,Xnewnewnewpieces, Onewnewnewpieces),
-    remove_piece(NB1,C, L,NNB,'X',Xnewnewnewpieces, Onewnewnewpieces,Xnewpieces, Onewpieces).
-
-move_right(B,7,L,'O',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    remove_piece(B,7, L,NB,'O',Xpieces, Opieces,Xnewpieces, Onewpieces).
-    
-
-move_right(B,7,L,'X',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    remove_piece(B,7, L,NB,'X',Xpieces, Opieces,Xnewpieces, Onewpieces).
-
-move_right(B,C,L,' ',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    write('Found a spot'),nl,
-    Xnewpieces = Xpieces,
-    Onewpieces = Opieces,
-    NB = B.
-
-move_up(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    L > 1,
-    NL is L-1,
-    nth1(L,B,Line),
-    nth1(C,Line,Elem),
-    nth1(NL,B,NLine),
-    nth1(C,NLine,NElem),
-    move_up(B,C,NL,NElem,NB,Xpieces, Opieces,Xnewpieces, Onewpieces).
-
-move_up(B,C,L,' ',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    L > 1,
-    write('Found a spot'),nl,
-    Xnewpieces = Xpieces,
-    Onewpieces = Opieces,
-    NB = B.
-
-move_up(B,C,L,'O',NB2,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    L > 1,
-    NL is L-1,
-    nth1(L,B,Line),
-    nth1(C,Line,Elem),
-    nth1(NL,B,NLine),
-    nth1(C,NLine,NElem),
-    move_up(B,C,NL,NElem,NB,Xpieces, Opieces,Xnewpieces1, Onewpieces1),
-    place_piece(NB,C, NL,NB1,1,Xnewpieces1, Onewpieces1,Xnewpieces2, Onewpieces2),
-    remove_piece(NB1,C, L,NB2,'O',Xnewpieces2, Onewpieces2,Xnewpieces, Onewpieces).
-
-move_up(B,C,L,'X',NB2,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    L > 1,
-    NL is L-1,
-    nth1(L,B,Line),
-    nth1(C,Line,Elem),
-    nth1(NL,B,NLine),
-    nth1(C,NLine,NElem),
-    move_up(B,C,NL,NElem,NB,Xpieces, Opieces,Xnewpieces1, Onewpieces1),
-    place_piece(NB,C, NL,NB1,0,Xnewpieces1, Onewpieces1,Xnewpieces2, Onewpieces2),
-    remove_piece(NB1,C, L,NB2,'X',Xnewpieces2, Onewpieces2,Xnewpieces, Onewpieces).
-
-move_up(B,C,1,'O',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    remove_piece(B,C, 1,NB,'O',Xpieces, Opieces,Xnewpieces, Onewpieces).
-
-move_up(B,C,1,'X',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    remove_piece(B,C, 1,NB,'X',Xpieces, Opieces,Xnewpieces, Onewpieces).
-
-move_up(B,C,L,' ',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    write('Found a spot'),nl,
-    Xnewpieces = Xpieces,
-    Onewpieces = Opieces,
-    NB = B.
-
-move_down(B,C,L,NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    L < 7,
-    NL is L+1,
-    nth1(L,B,Line),
-    nth1(C,Line,Elem),
-    nth1(NL,B,NLine),
-    nth1(C,NLine,NElem),
-    move_down(B,C,NL,NElem,NB,Xpieces, Opieces,Xnewpieces, Onewpieces).
-
-move_down(B,C,L,' ',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    L < 7,
-    write('Found a spot'),nl,
-    Xnewpieces = Xpieces,
-    Onewpieces = Opieces,
-    NB = B.
-
-move_down(B,C,L,'O',NB2,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    L < 7,
-    NL is L+1,
-    nth1(L,B,Line),
-    nth1(C,Line,Elem),
-    nth1(NL,B,NLine),
-    nth1(C,NLine,NElem),
-    move_down(B,C,NL,NElem,NB,Xpieces, Opieces,Xnewpieces1, Onewpieces1),
-    place_piece(NB,C, NL,NB1,1,Xnewpieces1, Onewpieces1,Xnewpieces2, Onewpieces2),
-    remove_piece(NB1,C, L,NB2,'O',Xnewpieces2, Onewpieces2,Xnewpieces, Onewpieces).
-
-move_down(B,C,L,'X',NB2,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    L < 7,
-    NL is L+1,
-    nth1(L,B,Line),
-    nth1(C,Line,Elem),
-    nth1(NL,B,NLine),
-    nth1(C,NLine,NElem),
-    move_down(B,C,NL,NElem,NB,Xpieces, Opieces,Xnewpieces1, Onewpieces1),
-    place_piece(NB,C, NL,NB1,0,Xnewpieces1, Onewpieces1,Xnewpieces2, Onewpieces2),
-    remove_piece(NB1,C, L,NB2,'X',Xnewpieces2, Onewpieces2,Xnewpieces, Onewpieces).
-
-move_down(B,C,7,'O',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    remove_piece(B,C, 7,NB,'O',Xpieces, Opieces,Xnewpieces, Onewpieces).
-
-move_down(B,C,7,'X',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    remove_piece(B,C, 7,NB,'X',Xpieces, Opieces,Xnewpieces, Onewpieces).
-
-move_down(B,C,L,' ',NB,Xpieces, Opieces,Xnewpieces, Onewpieces):-
-    write('Found a spot'),nl,
-    Xnewpieces = Xpieces,
-    Onewpieces = Opieces,
-    NB = B.
-*/
