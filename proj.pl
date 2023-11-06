@@ -202,7 +202,7 @@ start_game(GameState):-
         update_Round(GameState1, GameState2),
         start_game(GameState2)
     ;
-        end_screen(Winner),
+        end_screen(Winner)
     ).
 
 check_move(GameState, NewGameState):-
@@ -286,7 +286,7 @@ move_right(GameState, C, L, NewGameState):-
                         update_take_X(GameState1, GameState2)
                     ;
                         place_piece(GameState, NC, L, 1, GameState1),
-                        update_take_X(GameState1, GameState2)
+                        update_take_O(GameState1, GameState2)
                     ),
                     remove_piece(GameState2, C, L, NewGameState)
                 ;
@@ -325,7 +325,7 @@ move_left(GameState, C, L, NewGameState):-
                         update_take_X(GameState1, GameState2)
                     ;
                         place_piece(GameState, NC, L, 1, GameState1),
-                        update_take_X(GameState1, GameState2)
+                        update_take_O(GameState1, GameState2)
                     ),
                     remove_piece(GameState2, C, L, NewGameState)
                 ;
@@ -657,20 +657,20 @@ game_over(GameState, Winner):-
     ;
         get_Oamount(GameState, Opieces),
         (Opieces = 8 ->
-            Winner = 1,
+            Winner = 1
         ;
             (Round = 0 ->
                 (Xpieces > Opieces ->
                     Winner = 0
                 ;
                     (Opieces > Xpieces ->
-                        winner = 1
+                        Winner = 1
                     ;
-                        Winner = 2,
+                        Winner = 2
                     )
                 )
             ;
-                Winner = 3;
+                Winner = 3
             )
         )
     ).
