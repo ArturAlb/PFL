@@ -21,7 +21,7 @@ set_player1(GameState, NewGameState,Player) :-
     replace(Line,4,Player,NewLine),
     replace(GameState,2,NewLine,NewGameState).
 
-set_player1(GameState, NewGameState,Player) :-
+set_player2(GameState, NewGameState,Player) :-
     nth1(2,GameState,Line),
     replace(Line,5,Player,NewLine),
     replace(GameState,2,NewLine,NewGameState).
@@ -84,7 +84,7 @@ menu :-
     write('Menu:'), nl,
     write('1. 2 players'), nl,
     write('2. H/PC'), nl,
-    write('3. Option 3'), nl,
+    write('3. PC/H'), nl,
     write('4. Option 4'), nl,
     read_option(Option),
     handle_option(Option).
@@ -94,17 +94,25 @@ read_option(Option) :-
 
 handle_option(1) :-
     write('You selected Option 1.\n'),
-    start_game(60).
+    initial_state(GameState),
+    start_game(GameState).
 
 handle_option(2) :-
     write('You selected Option 2.\n'),
-    start_game_2(60).
+    initial_state(GameState),
+    set_player2(GameState, GameState1, 1),
+    start_game(GameState1).
 
 handle_option(3) :-
-    write('You selected Option 3.\n').
+    write('You selected Option 3.\n'),
+    initial_state(GameState),
+    set_player1(GameState, GameState1, 1),
+    start_game(GameState).
 
 handle_option(4) :-
-    write('You selected Option 4.\n').
+    write('You selected Option 4.\n'),
+    initial_state(GameState),
+    start_game(GameState).
 
 handle_option(Option) :-
     write('Invalid option.'),
@@ -177,25 +185,14 @@ remove_piece(GameState, Column, Line, NewGameState):-
 
 /*check if the game is over*/
 
-is_even(X) :-
-    0 is X mod 2.
+get_player_type(GameState, Player):-
+    get_Round(GameState, Round),
+    Player1 is Round mod 2,
+    Player2 is Player1 + 4,
+    nth1(2,GameState,Line),
+    nth1(Player2,Line,Player).
 
 % game loop -----------------------------
-
-start_game(0).
-
-start_game(60):-
-    initial_state(GameState),
-    get_Board(GameState, Board),
-    draw_board(Board),
-    get_Xamount(GameState, Xpieces),
-    get_Oamount(GameState, Opieces),
-    write('Player 1 - X, player 2 - O'), nl,
-    write('Player 1: '),write(Xpieces),nl,
-    write('Player 2: '),write(Opieces),nl,
-    check_move(GameState, GameState1),
-    update_Round(GameState1, GameState2),
-    start_game(GameState2).
 
 start_game(GameState):-
     game_over(GameState, Winner),
@@ -208,7 +205,13 @@ start_game(GameState):-
         write('Player 1 - X, player 2 - O'), nl,
         write('Player 1: '),write(Xpieces),nl,
         write('Player 2: '),write(Opieces),nl,
-        check_move(GameState, GameState1),
+        get_player_type(GameState, Player),
+        (Player = 0 ->
+            check_move(GameState, GameState1)
+            ;
+            GameState1 = GameState,
+            write('PC move'),nl
+        ),
         update_Round(GameState1, GameState2),
         start_game(GameState2)
     ;
