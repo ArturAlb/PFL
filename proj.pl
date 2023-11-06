@@ -14,7 +14,17 @@ initial_state([[
     [' ', ' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' ', ' ']
-], [0, 0, 60]]).
+], [0, 0, 60,0,0]]).
+
+set_player1(GameState, NewGameState,Player) :-
+    nth1(2,GameState,Line),
+    replace(Line,4,Player,NewLine),
+    replace(GameState,2,NewLine,NewGameState).
+
+set_player1(GameState, NewGameState,Player) :-
+    nth1(2,GameState,Line),
+    replace(Line,5,Player,NewLine),
+    replace(GameState,2,NewLine,NewGameState).
 
 update_add_X(GameState,NewGameState) :-
     nth1(2,GameState,Line),
@@ -529,7 +539,7 @@ move_up_right(GameState, C, L, NewGameState):-
                 NewGameState = GameState
             ;
                 NL is L - 1,
-                (NL = 8 ->
+                (NL = 0 ->
                     remove_piece(GameState, C, L, GameState1),
                     (ElemC = 'X' ->
                         update_take_X(GameState1, NewGameState)
