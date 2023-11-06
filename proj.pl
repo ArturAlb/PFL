@@ -14,7 +14,7 @@ initial_state([[
     [' ', ' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' ', ' ']
-], [0, 0, 60,0,0]]).
+], [0, 0, 60, 0, 0]]).
 
 set_player1(GameState, NewGameState,Player) :-
     nth1(2,GameState,Line),
@@ -107,7 +107,7 @@ handle_option(3) :-
     write('You selected Option 3.\n'),
     initial_state(GameState),
     set_player1(GameState, GameState1, 1),
-    start_game(GameState).
+    start_game(GameState1).
 
 handle_option(4) :-
     write('You selected Option 4.\n'),
@@ -215,7 +215,7 @@ start_game(GameState):-
         update_Round(GameState1, GameState2),
         start_game(GameState2)
     ;
-        end_screen(Winner)
+        end_screen(GameState, Winner)
     ).
 
 check_move(GameState, NewGameState):-
@@ -229,6 +229,7 @@ check_move(GameState, NewGameState):-
     check_move(Elem, GameState, C, L, NewGameState).
     
 check_move('X',GameState, C, L, NewGameState):-
+    get_Board(GameState, B),
     write('Invalid, try again'),nl,
     write('Column: '),
     read(NC),nl,
@@ -239,6 +240,7 @@ check_move('X',GameState, C, L, NewGameState):-
     check_move(Elem, GameState, NC, NL, NewGameState).
 
 check_move('O', GameState, Column, Line, NewGameState):-
+    get_Board(GameState, B),
     write('Invalid, try again'),nl,
     write('Column: '),
     read(NC),nl,
@@ -633,12 +635,12 @@ move_up_left(GameState, C, L, NewGameState):-
 valid_moves(GameState, Moves) :-
     get_Board(GameState, Board),
     findall(
-        (Player, Row, Col),
-        (between(1, 8, Row), between(1, 8, Col), valid_move(GameState, Row, Col)),
+        (Col, Row),
+        (between(1, 8, Row), between(1, 8, Col), valid_move(GameState, Col, Row)),
         Moves
     ).
 
-valid_move(GameState, Row, Col) :-
+valid_move(GameState, Col, Row) :-
     Row > 0,
     Row < 8,
     Col > 0,
@@ -652,7 +654,7 @@ select_random_move(GameState, RandomMove) :-
     valid_moves(GameState, Moves),
     random_member(RandomMove, Moves).
 
-end_screen(Winner):-
+end_screen(GameState, Winner):-
     (Winner = 0 ->
         write('Player 1 wins')
     ;
@@ -661,12 +663,14 @@ end_screen(Winner):-
         ;
             write('it\'s a draw')
         )
-    ).
+    ),
+    get_Board(GameState, Board),
+    draw_board(Board).
 
 game_over(GameState, Winner):-
     get_Round(GameState, Round),
     get_Xamount(GameState, Xpieces),
-    (Xpieces = 8 ->
+    (Xpieces = 7 ->
         Winner = 0
     ;
         get_Oamount(GameState, Opieces),
