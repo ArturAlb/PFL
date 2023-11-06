@@ -627,15 +627,15 @@ move_up_left(GameState, C, L, NewGameState):-
         )
     ).
 
-valid_moves(GameState, Player, Moves) :-
+valid_moves(GameState, Moves) :-
     get_Board(GameState, Board),
     findall(
         (Player, Row, Col),
-        (between(1, 8, Row), between(1, 8, Col), valid_move(GameState, Player, Row, Col)),
+        (between(1, 8, Row), between(1, 8, Col), valid_move(GameState, Row, Col)),
         Moves
     ).
 
-valid_move(GameState, Player, Row, Col) :-
+valid_move(GameState, Row, Col) :-
     Row > 0,
     Row < 8,
     Col > 0,
@@ -645,8 +645,9 @@ valid_move(GameState, Player, Row, Col) :-
     nth1(Col, Line, Elem),
     Elem = ' '.
 
-select_random_move(Moves, RandomMove) :-
-   random_member(RandomMove, Moves).
+select_random_move(GameState, RandomMove) :-
+    valid_moves(GameState, Moves),
+    random_member(RandomMove, Moves).
 
 end_screen(Winner):-
     (Winner = 0 ->
