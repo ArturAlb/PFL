@@ -1,6 +1,8 @@
 % FILEPATH: /path/to/file.pl
 :- use_module(library(lists)).
 :- use_module(library(clpr)).
+:- use_module(library(between)).
+:- use_module(library(random)).
 
 play :-
     menu.
@@ -112,7 +114,9 @@ handle_option(3) :-
 handle_option(4) :-
     write('You selected Option 4.\n'),
     initial_state(GameState),
-    start_game(GameState).
+    set_player1(GameState, GameState1, 1),
+    set_player2(GameState1, GameState2, 1),
+    start_game(GameState2).
 
 handle_option(Option) :-
     write('Invalid option.'),
@@ -209,8 +213,12 @@ start_game(GameState):-
         (Player = 0 ->
             check_move(GameState, GameState1)
             ;
-            GameState1 = GameState,
-            write('PC move'),nl
+            write('PC is thinking move'),nl,
+            select_random_move(GameState, Col, Row),
+            write(Col),nl,
+            write(Row),nl,
+            check_move(' ',GameState, Col, Row, GameState1),
+            write('PC moved'),nl
         ),
         update_Round(GameState1, GameState2),
         start_game(GameState2)
@@ -635,8 +643,8 @@ move_up_left(GameState, C, L, NewGameState):-
 valid_moves(GameState, Moves) :-
     get_Board(GameState, Board),
     findall(
-        (Col, Row),
-        (between(1, 8, Row), between(1, 8, Col), valid_move(GameState, Col, Row)),
+        [Col, Row],
+        (between(1, 7, Row), between(1, 7, Col), valid_move(GameState, Col, Row)),
         Moves
     ).
 
@@ -650,9 +658,12 @@ valid_move(GameState, Col, Row) :-
     nth1(Col, Line, Elem),
     Elem = ' '.
 
-select_random_move(GameState, RandomMove) :-
+select_random_move(GameState, Col,Row) :-
     valid_moves(GameState, Moves),
-    random_member(RandomMove, Moves).
+    random_member(RandomMove, Moves),
+    nth1(1,RandomMove,Col),
+    nth1(2,RandomMove,Row),
+    write('Random move: '),write(Col),write(' '),write(Row),nl.
 
 end_screen(GameState, Winner):-
     (Winner = 0 ->
@@ -670,7 +681,7 @@ end_screen(GameState, Winner):-
 game_over(GameState, Winner):-
     get_Round(GameState, Round),
     get_Xamount(GameState, Xpieces),
-    (Xpieces = 7 ->
+    (Xpieces = 8 ->
         Winner = 0
     ;
         get_Oamount(GameState, Opieces),
